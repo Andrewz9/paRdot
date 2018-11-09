@@ -49,7 +49,8 @@ pardot_client.authenticate <- function() {
                      user_key = .paRdotEnv$data$pardot_user_key)
 
   # make initial API call to authenticate
-  fetch_api_call <- POST("https://pi.pardot.com/api/login/version/3", body= auth_body)
+  if (!exists("pardot_curl_options")) pardot_curl_options <<- NULL
+  fetch_api_call <- POST("https://pi.pardot.com/api/login/version/3", config = pardot_curl_options, body= auth_body)
 
   # returns xml node with <api_key>
   api_key <<- xml_text(content(fetch_api_call))
@@ -106,11 +107,11 @@ pardot_client.api_call_json <- function(request_url, unlist_dataframe = TRUE, ve
 }
 
 pardot_client.api_call <- function(request_url) {
-  resp <- GET(request_url)
+  resp <- GET(request_url, config = pardot_curl_options)
 
   if ( resp$status != 200 ) {
     pardot_client.authenticate()
-    resp <- GET(request_url, content_type_xml())
+    resp <- GET(request_url, config = pardot_curl_options, content_type_xml())
   }
 
   xml_response <- xmlNode(content(resp, "parsed"))
@@ -121,7 +122,7 @@ pardot_client.api_call <- function(request_url) {
 pardot_client.get_data_frame <- function(theUrl) {
     # GET the url response in json format and convert to list
     # Replace NULL values by NA so that list can be cast to data frame
-    respjson <- GET(theUrl, content_type_json())
+    respjson <- GET(theUrl, config = pardot_curl_options, content_type_json())
     if (respjson$status != 200) {
         warning(sprintf("GET returned %s", as.character(respjson$status)))
         return(data.frame())
