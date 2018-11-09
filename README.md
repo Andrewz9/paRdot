@@ -11,7 +11,11 @@ devtools::install_github("demgenman/paRdot")
 Define the connection options that are to be used for all subsequent calls to the Pardot API. This is optional. Note: As of 1 Nov 2018 Pardot API calls should use TLS v1.1 or higher.
 
 ```
-set_curl_options( httr:config(sslversion = 6) ) # Connect using SSL/TLS v1.2 
+# Use SSL/TLS v1.2 for Pardot API calls only
+set_curl_options( httr:config(sslversion = 6) ) 
+# Alternatively, use SSL/TLS v1.2 for any curl connection
+library(httr)
+set_config(config(sslversion = 6)) 
 ```
 
 Set your Pardot credentials.

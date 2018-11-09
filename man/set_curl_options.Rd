@@ -2,8 +2,9 @@
 % Please edit documentation in R/set_curl_options.R
 \name{set_curl_options}
 \alias{set_curl_options}
-\title{Set curl options for Pardot API calls
-See httr::config() and curl::handle_setopt() for options.}
+\title{Set curl options for Pardot API calls.
+See httr::config() and curl::handle_setopt() for options.
+Alternative to using this function, use httr::set_config() to globally set the curl options.}
 \usage{
 set_curl_options(curl_options = NULL)
 }
@@ -11,11 +12,16 @@ set_curl_options(curl_options = NULL)
 \item{curl_options}{To set curl options directly. Usage: curl_options = httr:config(...)}
 }
 \description{
-Set curl options for Pardot API calls
+Set curl options for Pardot API calls.
 See httr::config() and curl::handle_setopt() for options.
+Alternative to using this function, use httr::set_config() to globally set the curl options.
 }
 \examples{
 \dontrun{
-set_curl_options(httr::config(sslversion = 6)) # Connect using SSL/TLS v1.2
+set_curl_options(httr::config(sslversion = 6)) # Connect using SSL/TLS v1.2 for Pardot API calls only
+set_credentials("your-username", "your-password", "your-user-key")
+
+library(httr)
+set_config(config(sslversion = 6)) # Connect using SSL/TLS v1.2 for any curl connection
 set_credentials("your-username", "your-password", "your-user-key")}
 }
