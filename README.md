@@ -8,7 +8,13 @@ devtools::install_github("demgenman/paRdot")
 
 ### Getting Started:
 
-Make sure to set your Pardot credentials
+Define the connection options that are to be used for all subsequent calls to the Pardot API. This is optional. Note: As of 1 Nov 2018 Pardot API calls should use TLS v1.1 or higher.
+
+```
+set_curl_options( httr:config(sslversion = 6) ) # Connect using SSL/TLS v1.2 
+```
+
+Set your Pardot credentials.
 
 ```
 set_credentials('your-username', 'your-password', 'your-user-key')
