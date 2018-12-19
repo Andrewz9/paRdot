@@ -10,6 +10,8 @@ pardot_email_stats(list_email_id, verbose = 0, ...)
 \item{list_email_id}{The Pardot ID of the target email.}
 
 \item{verbose}{Verbose output. See pardot_client().}
+
+\item{...}{Comma separated list of parameter name and parameter value pairs. Parameter names are not quoted.}
 }
 \value{
 A data frame.

@@ -4,6 +4,7 @@
 #'
 #' @param list_email_id The Pardot ID of the target email.
 #' @param verbose Verbose output. See pardot_client(). 
+#' @param ... Comma separated list of parameter name and parameter value pairs. Parameter names are not quoted. 
 #' @return A data frame.
 #' @examples
 #' \dontrun{
