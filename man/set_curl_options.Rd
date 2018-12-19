@@ -18,7 +18,8 @@ Alternative to using this function, use httr::set_config() to globally set the c
 }
 \examples{
 \dontrun{
-set_curl_options(httr::config(sslversion = 6)) # Connect using SSL/TLS v1.2 for Pardot API calls only
+# Connect using SSL/TLS v1.2 for Pardot API calls only
+set_curl_options(httr::config(sslversion = 6))
 set_credentials("your-username", "your-password", "your-user-key")
 
 library(httr)
