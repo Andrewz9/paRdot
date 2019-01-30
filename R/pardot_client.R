@@ -108,6 +108,7 @@ pardot_client.api_call_json <- function(request_url, unlist_dataframe = TRUE, ve
 
 pardot_client.api_call <- function(request_url) {
   resp <- GET(request_url, config = pardot_curl_options, add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
+  print(str(content(resp)$headers))
 
   if ( resp$status != 200 ) {
     pardot_client.authenticate()
