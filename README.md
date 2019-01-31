@@ -3,7 +3,7 @@ A simple R package for the Pardot API v3
 
 ### Install
 ```
-devtools::install_github("demgenman/paRdot")
+devtools::install_github("adelawalla/paRdot")
 ```
 
 ### Getting Started:
