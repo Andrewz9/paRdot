@@ -29,10 +29,13 @@ pardot_client <- function(object, operator, identifier_field=NULL, identifier=NU
   param_list <- (as.list(match.call()))
 
   if (!exists('api_key')) {
+    print('no api key. authenticating')
     pardot_client.authenticate()
   } else if (exists('api_key') && api_key == "Login failed" ) {
+    print('login failed. authenticating')
     pardot_client.authenticate()
   } else {
+    print(paste0('Have API Key: ', api_key))
     request_url <- pardot_client.build_url(object, operator, identifier_field, identifier, request_pars)
 	if (result_format == "json") {
 		pardot_client.api_call_json(request_url, unlist_dataframe = unlist_dataframe, verbose = verbose)
