@@ -52,6 +52,9 @@ pardot_client.authenticate <- function() {
   if (!exists("pardot_curl_options")) pardot_curl_options <<- NULL
   fetch_api_call <- POST("https://pi.pardot.com/api/login/version/3", config = pardot_curl_options, body= auth_body)
 
+  print(paste0('making auth call with options: ', pardot_curl_options))
+  print(paste0('Result: ', xml_text(content(fetch_api_call))))
+
   # returns xml node with <api_key>
   api_key <<- xml_text(content(fetch_api_call))
 }
