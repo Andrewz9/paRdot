@@ -37,9 +37,12 @@ pardot_client <- function(object, operator, identifier_field=NULL, identifier=NU
   } else {
     print(paste0('Have API Key: ', api_key))
     request_url <- pardot_client.build_url(object, operator, identifier_field, identifier, request_pars)
+    print(request_url)
 	if (result_format == "json") {
+        print('making json call')
 		pardot_client.api_call_json(request_url, unlist_dataframe = unlist_dataframe, verbose = verbose)
 	} else {
+        print('making XML call')
 		pardot_client.api_call(request_url)
 	}
   }
