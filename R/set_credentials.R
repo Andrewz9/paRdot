@@ -19,7 +19,6 @@ set_credentials <- function(pardot_username, pardot_password, pardot_user_key){
     .paRdotEnv$data$pardot_password <- pardot_password
     .paRdotEnv$data$pardot_user_key <- pardot_user_key
     Sys.setenv("PARDOT_USER_KEY" = pardot_user_key)
-    print(paste('setting keys', pardot_username, pardot_password, pardot_user_key, Sys.getenv("PARDOT_USER_KEY")))
   }
   else{
     warning("Warning -- Pardot credentials must be set!")

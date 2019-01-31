@@ -29,20 +29,14 @@ pardot_client <- function(object, operator, identifier_field=NULL, identifier=NU
   param_list <- (as.list(match.call()))
 
   if (!exists('api_key')) {
-    print('no api key. authenticating')
     pardot_client.authenticate()
   } else if (exists('api_key') && api_key == "Login failed" ) {
-    print('login failed. authenticating')
     pardot_client.authenticate()
   } else {
-    print(paste0('Have API Key: ', api_key))
     request_url <- pardot_client.build_url(object, operator, identifier_field, identifier, request_pars)
-    print(request_url)
 	if (result_format == "json") {
-        print('making json call')
 		pardot_client.api_call_json(request_url, unlist_dataframe = unlist_dataframe, verbose = verbose)
 	} else {
-        print('making XML call')
 		pardot_client.api_call(request_url)
 	}
   }
@@ -57,9 +51,6 @@ pardot_client.authenticate <- function() {
   # make initial API call to authenticate
   if (!exists("pardot_curl_options")) pardot_curl_options <<- NULL
   fetch_api_call <- POST("https://pi.pardot.com/api/login/version/3", config = pardot_curl_options, body= auth_body)
-
-  print(paste0('making auth call with options: ', pardot_curl_options))
-  print(paste0('Result: ', xml_text(content(fetch_api_call))))
 
   # returns xml node with <api_key>
   api_key <<- xml_text(content(fetch_api_call))
@@ -117,7 +108,6 @@ pardot_client.api_call_json <- function(request_url, unlist_dataframe = TRUE, ve
 
 pardot_client.api_call <- function(request_url) {
   resp <- GET(request_url, config = pardot_curl_options, add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
-  print(str(content(resp)$headers))
 
   if ( resp$status != 200 ) {
     pardot_client.authenticate()
