@@ -107,11 +107,11 @@ pardot_client.api_call_json <- function(request_url, unlist_dataframe = TRUE, ve
 }
 
 pardot_client.api_call <- function(request_url) {
-  resp <- GET(request_url, config = pardot_curl_options)
+  resp <- GET(request_url, config = pardot_curl_options, add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
 
   if ( resp$status != 200 ) {
     pardot_client.authenticate()
-    resp <- GET(request_url, config = pardot_curl_options, content_type_xml())
+    resp <- GET(request_url, config = pardot_curl_options, content_type_xml(), add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
   }
 
   xml_response <- xmlNode(content(resp, "parsed"))
@@ -122,7 +122,7 @@ pardot_client.api_call <- function(request_url) {
 pardot_client.get_data_frame <- function(theUrl) {
     # GET the url response in json format and convert to list
     # Replace NULL values by NA so that list can be cast to data frame
-    respjson <- GET(theUrl, config = pardot_curl_options, content_type_json())
+    respjson <- GET(theUrl, config = pardot_curl_options, content_type_json(), add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
     if (respjson$status != 200) {
         warning(sprintf("GET returned %s", as.character(respjson$status)))
         return(data.frame())
@@ -165,7 +165,7 @@ pardot_client.build_url <- function(object, operator, identifier_field=NULL, ide
     identifier_field <- pardot_client.scrub_opts(identifier_field)
     identifier <- pardot_client.scrub_opts(identifier)
     request_pars <- if (length(request_pars) > 0) sub("^&*", "\\&", request_pars)
-    request_url <- paste0("https://pi.pardot.com/api/", object,"/version/3/do/", operator, identifier_field, identifier,"?api_key=", api_key, "&user_key=", Sys.getenv("PARDOT_USER_KEY"), request_pars, "&output=bulk&format=json")
+    request_url <- paste0("https://pi.pardot.com/api/", object,"/version/3/do/", operator, identifier_field, identifier, "?", request_pars, "&output=bulk&format=json")
   return(request_url)
 }
 
