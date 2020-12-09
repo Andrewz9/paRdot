@@ -36,6 +36,8 @@ pardot_client <- function(object, operator, identifier_field=NULL, identifier=NU
     request_url <- pardot_client.build_url(object, operator, identifier_field, identifier, request_pars)
 	if (result_format == "json") {
 		pardot_client.api_call_json(request_url, unlist_dataframe = unlist_dataframe, verbose = verbose)
+	} else if (result_format == "list") {
+	    pardot_client.api_call_json_list(request_url, verbose = verbose)
 	} else {
 		pardot_client.api_call(request_url)
 	}
@@ -118,6 +120,21 @@ pardot_client.api_call <- function(request_url) {
   return(xml_response)
 }
 
+pardot_client.api_call_json_list <- function(theUrl, verbose = 0) {
+    if (verbose > 1) print(theUrl)
+    respjson <- GET(theUrl, config = pardot_curl_options, content_type_json(), add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
+    if (respjson$status != 200) {
+        warning(sprintf("GET returned %s", as.character(respjson$status)))
+        return(data.frame())
+    }
+    res <- fromJSON(content(respjson, as = "text", encoding = "UTF-8"))
+    if (res$`@attributes`$stat == "fail") {
+        warning(res$err)
+        return(res)
+    } else {
+        return(res[[2]])
+    }
+}
 
 pardot_client.get_data_frame <- function(theUrl) {
     # GET the url response in json format and convert to list
@@ -140,7 +157,8 @@ pardot_client.get_data_frame <- function(theUrl) {
         d <- as.data.frame(res_data, stringsAsFactors = FALSE)
     } else {
         warning("paRdot API response could not be cast to dataframe")
-        return(res_data)
+        print(res)
+        return(NULL)
     }
     return(d)
 }
@@ -165,7 +183,8 @@ pardot_client.build_url <- function(object, operator, identifier_field=NULL, ide
     identifier_field <- pardot_client.scrub_opts(identifier_field)
     identifier <- pardot_client.scrub_opts(identifier)
     request_pars <- if (length(request_pars) > 0) sub("^&*", "\\&", request_pars)
-    request_url <- paste0("https://pi.pardot.com/api/", object,"/version/3/do/", operator, identifier_field, identifier, "?", request_pars, "&output=bulk&format=json")
+    request_url <- paste0("https://pi.pardot.com/api/", object,"/version/3/do/", operator, identifier_field, identifier, "?", request_pars, "&format=json")
+    if (!grepl("&output=[a-z]+", request_url)) request_url <- paste0(request_url, "&output=bulk")
   return(request_url)
 }
 

@@ -104,7 +104,13 @@ _emailTemplate_ | [read](http://developer.pardot.com/kb/api-version-3/email-temp
 
 Identifier_field and identifier are  required for operations for using the object, and specify the name and value of the identifier, respectively. 
 
-If result_format is _json_ the function returns a single data frame, using successive API calls with iterative url querystrings to accumulate the results. The returned data frame includes all records selected by the request_pars which should be formatted as a url query string. Iteration uses the API querystring parameter _offset_. The first call uses no offset. If _offset_ is specified as part of the request_pars querystring that value is used for the first call. Successive calls increment the offset by 200. 
+If result_format="json" the function returns a single data frame, using successive API calls with iterative url querystrings to accumulate the results. The returned data frame includes all records selected by the request_pars which should be formatted as a url query string. Iteration uses the API querystring parameter _offset_. The first call uses no offset. If _offset_ is specified as part of the request_pars querystring that value is used for the first call. Successive calls increment the offset by 200. 
+
+Use result_format="list" to get results in a list of lists format. In this case pardot_client() does not make successive API calls to accumulate results. 
+
+```
+xml_response <- pardot_client("project", "read", "id", "12345678", result_format="list")
+```
 
 Information about call progress is available using the verbose parameter. 1 displays a progress bar. 2 additionally displays call urls and the data structure returned by the first call.
 
@@ -112,7 +118,7 @@ The paRdot wrapper functions are for querying an object.
 
 **XML response with some configuration**
 
-Use result_format="xml" to obtain the requested data in XML format. 
+Use result_format="xml" to obtain the requested data in parsed XML format returned by xmlNode(). 
 
 ```
 xml_response <- pardot_client(object, operator, identifier_field, identifier, result_format="xml")
