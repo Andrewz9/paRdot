@@ -18,11 +18,18 @@ library(httr)
 set_config(config(sslversion = 6)) 
 ```
 
-Set your Pardot credentials.
+**Authentication**
+
+a) using Pardot User Key and API Key:
 
 ```
-set_credentials('your-username', 'your-password', 'your-user-key')
+set_credentials('your-username', 'your-password', 'your-user-key', '', '', '', method = 'pardot')
 ```
+b) using Salesforce OAuth:
+```
+set_credentials('your-username', 'your-password', '', 'pardot-business-unit-id', 'client-id', 'client-secret', method = 'oauth')
+```
+
 Next, make a paRdot API call.
 
 ```

@@ -1,11 +1,11 @@
-#' Set the Pardot user credentials
+#' Set the Pardot user credentials and authenticate using Pardot User Key and API Key
 #'
 #' Simple function to set the users pardot credentials in an R environment variable
 #'
 #' @param pardot_username A string containing your Pardot UserName
 #' @param pardot_password A string containing your Pardot Password
 #' @param pardot_user_key A string containing your Pardot User Key
-#'
+#' @return Authentication result (api key or an error message)
 #' @examples
 #' \dontrun{
 #' set_credentials("your-username", "your-password", "your-user-key")}
@@ -15,6 +15,7 @@
 
 set_credentials <- function(pardot_username, pardot_password, pardot_user_key){
   if(!is.null(pardot_username) && !is.null(pardot_password) && !is.null(pardot_user_key)) {
+    .paRdotEnv$data$method <- "pardot"
     .paRdotEnv$data$pardot_username <- pardot_username
     .paRdotEnv$data$pardot_password <- pardot_password
     .paRdotEnv$data$pardot_user_key <- pardot_user_key
