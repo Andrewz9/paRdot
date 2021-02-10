@@ -23,11 +23,11 @@ set_config(config(sslversion = 6))
 a) using Pardot User Key and API Key:
 
 ```
-set_credentials('your-username', 'your-password', 'your-user-key', '', '', '', method = 'pardot')
+set_credentials('your-username', 'your-password', 'your-user-key')
 ```
 b) using Salesforce OAuth:
 ```
-set_credentials('your-username', 'your-password', '', 'pardot-business-unit-id', 'client-id', 'client-secret', method = 'oauth')
+set_credentials('your-username', 'your-password', 'pardot-business-unit-id', 'client-id', 'client-secret')
 ```
 
 Next, make a paRdot API call.
