@@ -27,7 +27,7 @@ set_credentials('your-username', 'your-password', 'your-user-key')
 ```
 b) using Salesforce OAuth:
 ```
-set_credentials('your-username', 'your-password', 'pardot-business-unit-id', 'client-id', 'client-secret')
+set_oauth_credentials('your-username', 'your-password', 'pardot-business-unit-id', 'client-id', 'client-secret')
 ```
 
 Next, make a paRdot API call.
