@@ -2,7 +2,7 @@
 % Please edit documentation in R/set_credentials.R
 \name{set_credentials}
 \alias{set_credentials}
-\title{Set the Pardot user credentials}
+\title{Set the Pardot user credentials and authenticate using Pardot User Key and API Key}
 \usage{
 set_credentials(pardot_username, pardot_password, pardot_user_key)
 }
@@ -12,6 +12,9 @@ set_credentials(pardot_username, pardot_password, pardot_user_key)
 \item{pardot_password}{A string containing your Pardot Password}
 
 \item{pardot_user_key}{A string containing your Pardot User Key}
+}
+\value{
+Authentication result (api key or an error message)
 }
 \description{
 Simple function to set the users pardot credentials in an R environment variable

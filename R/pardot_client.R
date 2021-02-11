@@ -11,7 +11,7 @@
 #' @return XML or a data frame.
 #' @examples
 #' \dontrun{
-#' set_credentials("your-username", "your-password", "your-user-key")
+#' set_oauth_credentials("username", "password", "businessunit-id", "client-id", "client-secret")
 #' pardot_client("campaign", "query")
 #' pardot_client(object = "campaign", operator = "query", 
 #'   request_params = "created_after=yesterday&id_greater_than=492276479")}
@@ -27,35 +27,58 @@ pardot_client <- function(object, operator, identifier_field=NULL, identifier=NU
   # identifier fields / identifier are optional
   # optional field to implement <- api_request_params,"&format=",api_format
   param_list <- (as.list(match.call()))
-
-  if (!exists('api_key')) {
+  api_key_exists <- exists("api_key")
+  access_token_exists <- exists("access_token")
+  if (!api_key_exists && !access_token_exists) {
     pardot_client.authenticate()
-  } else if (exists('api_key') && api_key == "Login failed" ) {
+  } else if (api_key_exists && api_key == "Login failed" ) {
+    pardot_client.authenticate()
+  } else if (access_token_exists && access_token == "authentication failure") {
     pardot_client.authenticate()
   } else {
     request_url <- pardot_client.build_url(object, operator, identifier_field, identifier, request_pars)
-	if (result_format == "json") {
-		pardot_client.api_call_json(request_url, unlist_dataframe = unlist_dataframe, verbose = verbose)
-	} else if (result_format == "list") {
-	    pardot_client.api_call_json_list(request_url, verbose = verbose)
-	} else {
-		pardot_client.api_call(request_url)
-	}
+    if (result_format == "json") {
+        pardot_client.api_call_json(request_url, unlist_dataframe = unlist_dataframe, verbose = verbose)
+    } else if (result_format == "list") {
+        pardot_client.api_call_json_list(request_url, verbose = verbose)
+    } else {
+        pardot_client.api_call(request_url)
+    }
   }
 }
 
 pardot_client.authenticate <- function() {
-  # body params must be set in list. Add .env get that will fetch these items
-  auth_body  <- list(email = .paRdotEnv$data$pardot_username,
-                     password = .paRdotEnv$data$pardot_password,
-                     user_key = .paRdotEnv$data$pardot_user_key)
-
-  # make initial API call to authenticate
-  if (!exists("pardot_curl_options")) pardot_curl_options <<- NULL
-  fetch_api_call <- POST("https://pi.pardot.com/api/login/version/3", config = pardot_curl_options, body= auth_body)
-
-  # returns xml node with <api_key>
-  api_key <<- xml_text(content(fetch_api_call))
+    if (!exists("pardot_curl_options")) pardot_curl_options <<- NULL
+    if (.paRdotEnv$data$method == "oauth") {
+        message("Authenticate via Salesforce OAuth")
+        token_url <- "https://login.salesforce.com/services/oauth2/token"
+        oauth_body <- list(grant_type = "password",
+                           client_id = .paRdotEnv$data$client_id,
+                           client_secret = .paRdotEnv$data$client_secret,
+                           username = .paRdotEnv$data$pardot_username,
+                           password = .paRdotEnv$data$pardot_password,
+                           format = "xml")
+        # Get OAuth access token
+        fetch_oauth_token <- POST(token_url, config = pardot_curl_options, body = oauth_body)
+        # Returns response with: id, issued_at, instance_url, signature, access_token, token_type (= 'Bearer')
+        # See help.salesforce.com/articlewView?id=sf.remoteaccess_oauth_username_password_flow.htm
+        access_token <<- xml_text(xml_find_all(content(fetch_oauth_token), "access_token"))
+        if (length(access_token) == 0) access_token <<- xml_text(xml_find_all(content(fetch_oauth_token), "error_description"))
+        return(access_token)
+    } else if (.paRdotEnv$data$method == "pardot") {
+        message("Authenticate using pardot credentials")
+        # body params must be set in list. Add .env get that will fetch these items
+        auth_body  <- list(email = .paRdotEnv$data$pardot_username,
+                           password = .paRdotEnv$data$pardot_password,
+                           user_key = .paRdotEnv$data$pardot_user_key)
+        # make initial API call to authenticate
+        fetch_api_call <- POST("https://pi.pardot.com/api/login/version/3", config = pardot_curl_options, body= auth_body)
+        # returns xml node with <api_key>
+        api_key <<- xml_text(content(fetch_api_call))
+        return(api_key)
+    } else {
+        return("Invalid paRdot authentication method")
+    }
 }
 
 pardot_client.api_call_json <- function(request_url, unlist_dataframe = TRUE, verbose = 0) {
@@ -108,12 +131,22 @@ pardot_client.api_call_json <- function(request_url, unlist_dataframe = TRUE, ve
 	return(polished_df)
 }
 
+pardot_client.add_pardot_api_headers <- function() {
+    if (.paRdotEnv$data$method == "pardot") {
+        return(add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
+    } else if (.paRdotEnv$data$method == "oauth") {
+        return(add_headers(Authorization = paste0("Bearer ", access_token), `Pardot-Business-Unit-Id` = .paRdotEnv$data$pardot_businessunit_id))        
+    } else {
+        return(NULL)
+    }
+}
+
 pardot_client.api_call <- function(request_url) {
-  resp <- GET(request_url, config = pardot_curl_options, add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
+  resp <- GET(request_url, config = pardot_curl_options, pardot_client.add_pardot_api_headers())
 
   if ( resp$status != 200 ) {
     pardot_client.authenticate()
-    resp <- GET(request_url, config = pardot_curl_options, content_type_xml(), add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
+    resp <- GET(request_url, config = pardot_curl_options, content_type_xml(), pardot_client.add_pardot_api_headers())
   }
 
   xml_response <- xmlNode(content(resp, "parsed"))
@@ -122,7 +155,7 @@ pardot_client.api_call <- function(request_url) {
 
 pardot_client.api_call_json_list <- function(theUrl, verbose = 0) {
     if (verbose > 1) print(theUrl)
-    respjson <- GET(theUrl, config = pardot_curl_options, content_type_json(), add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
+    respjson <- GET(theUrl, config = pardot_curl_options, content_type_json(), pardot_client.add_pardot_api_headers())
     if (respjson$status != 200) {
         warning(sprintf("GET returned %s", as.character(respjson$status)))
         return(data.frame())
@@ -139,7 +172,7 @@ pardot_client.api_call_json_list <- function(theUrl, verbose = 0) {
 pardot_client.get_data_frame <- function(theUrl) {
     # GET the url response in json format and convert to list
     # Replace NULL values by NA so that list can be cast to data frame
-    respjson <- GET(theUrl, config = pardot_curl_options, content_type_json(), add_headers(Authorization = paste0("Pardot user_key=", Sys.getenv("PARDOT_USER_KEY"), ",api_key=", api_key)))
+    respjson <- GET(theUrl, config = pardot_curl_options, content_type_json(), pardot_client.add_pardot_api_headers())
     if (respjson$status != 200) {
         warning(sprintf("GET returned %s", as.character(respjson$status)))
         return(data.frame())

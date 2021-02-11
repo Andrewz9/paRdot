@@ -4,9 +4,9 @@
 \alias{pardot_client}
 \title{Make a call to the Pardot API and return XML or data frame}
 \usage{
-pardot_client(object, operator, identifier_field = NULL, identifier = NULL,
-  request_pars = NULL, result_format = "json", unlist_dataframe = TRUE,
-  verbose = 0)
+pardot_client(object, operator, identifier_field = NULL,
+  identifier = NULL, request_pars = NULL, result_format = "json",
+  unlist_dataframe = TRUE, verbose = 0)
 }
 \arguments{
 \item{object}{A string containing a Pardot Object}
@@ -33,7 +33,7 @@ Make a call to the Pardot API and return XML or data frame
 }
 \examples{
 \dontrun{
-set_credentials("your-username", "your-password", "your-user-key")
+set_oauth_credentials("username", "password", "businessunit-id", "client-id", "client-secret")
 pardot_client("campaign", "query")
 pardot_client(object = "campaign", operator = "query", 
   request_params = "created_after=yesterday&id_greater_than=492276479")}
