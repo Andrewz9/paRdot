@@ -72,7 +72,7 @@ pardot_client.authenticate <- function() {
                            password = .paRdotEnv$data$pardot_password,
                            user_key = .paRdotEnv$data$pardot_user_key)
         # make initial API call to authenticate
-        fetch_api_call <- POST("https://pi.pardot.com/api/login/version/3", config = pardot_curl_options, body= auth_body)
+        fetch_api_call <- POST("https://pi.pardot.com/api/login/version/4", config = pardot_curl_options, body= auth_body)
         # returns xml node with <api_key>
         api_key <<- xml_text(content(fetch_api_call))
         return(api_key)
@@ -216,7 +216,7 @@ pardot_client.build_url <- function(object, operator, identifier_field=NULL, ide
     identifier_field <- pardot_client.scrub_opts(identifier_field)
     identifier <- pardot_client.scrub_opts(identifier)
     request_pars <- if (length(request_pars) > 0) sub("^&*", "\\&", request_pars)
-    request_url <- paste0("https://pi.pardot.com/api/", object,"/version/3/do/", operator, identifier_field, identifier, "?", request_pars, "&format=json")
+    request_url <- paste0("https://pi.pardot.com/api/", object,"/version/4/do/", operator, identifier_field, identifier, "?", request_pars, "&format=json")
     if (!grepl("&output=[a-z]+", request_url)) request_url <- paste0(request_url, "&output=bulk")
   return(request_url)
 }
